@@ -6,20 +6,20 @@ import Loader from "../../components/Loader";
 import { setCredentials } from "../../redux/features/auth/authSlice";
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [login, { isLoading }] = useLoginMutation();
 
-  const { userInfo } = useSelector(state => state.auth);
+  const { userInfo } = useSelector((state) => state.auth);
 
   const { search } = useLocation();
   const sp = new URLSearchParams(search);
 
-  const redirect = sp.get('redirect') || '/';
+  const redirect = sp.get("redirect") || "/";
 
   useEffect(() => {
     if (userInfo) {
@@ -29,15 +29,15 @@ const Login = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    
+
     try {
-      const res = await login({ email, password }).unwrap();
+      const res = await login({ email, password }).unwrap(); // unwrap is a utility function that unwraps the result of a fulfilled promise
       console.log(res);
-      dispatch(setCredentials({ ...res }));
+      dispatch(setCredentials({ ...res })); // dispatch is a function of the Redux store. You call store.dispatch to dispatch an action. This is the only way to trigger a state change.
     } catch (error) {
       toast.error(error?.data?.message || error.message);
     }
-  }
+  };
 
   return (
     <div>
@@ -92,7 +92,7 @@ const Login = () => {
           </form>
 
           <div className="mt-4">
-            <p classN ame="text-white">
+            <p className="text-white">
               New Customer?{" "}
               <Link
                 to={redirect ? `/register?redirect=${redirect}` : "/register"}
@@ -106,6 +106,6 @@ const Login = () => {
       </section>
     </div>
   );
-}
+};
 
 export default Login;

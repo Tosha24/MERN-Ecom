@@ -69,6 +69,7 @@ const logoutCurrentUser = asyncHandler(async (req, res) => {
 
 const getAllUsers = asyncHandler(async (req, res) => {
   const users = await User.find({});
+  console.log(users);
   res.json(users);
 });
 
@@ -149,7 +150,7 @@ const updateUserById = asyncHandler(async (req, res) => {
   if (user) {
     user.username = req.body.username || user.username;
     user.email = req.body.email || user.email;
-    user.isAdmin = Boolean(req.body.isAdmin);
+    user.isAdmin = Boolean(req.body.isAdmin || user.isAdmin);
 
     const updatedUser = await user.save();
 
