@@ -43,6 +43,7 @@ const ProductUpdate = () => {
         setBrand(productData.brand);
         setQuantity(productData.quantity);
         setImage(productData.image);
+        setStock(productData.countInStock);
     }
   }, [productData]);
 
