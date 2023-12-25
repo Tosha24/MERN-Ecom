@@ -19,10 +19,12 @@ import moment from "moment";
 import HeartIcon from "./HeartIcon";
 import Ratings from "./Ratings";
 import ProductTabs from "./ProductTabs";
+import { addToCart } from "../../redux/features/cart/cartSlice";
 
 const ProductDetails = () => {
   const { id: productId } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [quantity, setQuantity] = useState(1);
   const [rating, setRating] = useState(0);
@@ -57,6 +59,11 @@ const ProductDetails = () => {
     setRating(0);
     setComment("");
   };
+
+  const addToCartHandler = () => {
+    dispatch(addToCart({ ...product, quantity }));
+    navigate("/cart");
+  }
 
   return (
     <>
@@ -151,7 +158,7 @@ const ProductDetails = () => {
 
               <div className="btn-container">
                 <button
-                  // onClick={addToCartHandler}
+                  onClick={addToCartHandler}
                   disabled={product.countInStock === 0}
                   className={`${
                     product.countInStock === 0
