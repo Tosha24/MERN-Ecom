@@ -1,30 +1,49 @@
-import { useEffect } from "react"
-import { useSelector, useDispatch } from "react-redux"
-import { addToFavorites, removeFromFavorites, setFavorites } from "../../redux/features/favorites/favoriteSlice"
-import { addFavoriteToLocalStorage, removeFavoriteFromLocalStorage, getFavoritesFromLocalStorage } from "../../Utils/localStorage"
-import { FaHeart, FaRegHeart } from "react-icons/fa"
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { useAddToFavoritesMutation, useGetUserFavoritesQuery, useRemoveFavoritesMutation } from "../../redux/api/usersApiSlice";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { toast } from "react-toastify";
 
-const HeartIcon = ({ product }) => { 
-  const dispatch = useDispatch();
-  const favorites = useSelector(state => state.favorites) || []
-  const isFavorite = favorites.some((p) => p._id === product._id)
+const HeartIcon = ({ product }) => {
+  const { userInfo } = useSelector((state) => state.auth);
+
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  const [addToFavorites] = useAddToFavoritesMutation();
+  const [removeFromFavorites] = useRemoveFavoritesMutation();
+
+  const { data: favProducts, refetch } = useGetUserFavoritesQuery();
 
   useEffect(() => {
-    const favoritesFromLocalStorage = getFavoritesFromLocalStorage();
-    dispatch(setFavorites(favoritesFromLocalStorage));
-  }, [])
+    // Assuming favProducts is an array of favorite products for the user
+    const isProductFavorite = favProducts?.some((favProduct) => favProduct._id === product._id);
+    setIsFavorite(isProductFavorite);
+  }, [favProducts, product._id]);
 
-  const toggleFavorites = () => {
-    if(isFavorite){
-      dispatch(removeFromFavorites(product));
-      // remove the product from the local storage  
-      removeFavoriteFromLocalStorage(product._id);
-    }else{
-      dispatch(addToFavorites(product));
-      // add the product to local Storage 
-      addFavoriteToLocalStorage(product);
+  const toggleFavorites = async () => {
+    if (!userInfo) {
+      toast.error("Login to add to favorites");
+      return;
     }
-  }
+
+    if (isFavorite) {
+      await removeFromFavorites({
+        userId: userInfo._id,
+        productId: product._id,
+      });
+      refetch();
+      setIsFavorite(false);
+      toast.success("Removed from favorites");
+    } else {
+      await addToFavorites({
+        userId: userInfo._id,
+        productId: product._id,
+      });
+      refetch();
+      setIsFavorite(true);
+      toast.success("Added to favorites");  
+    }
+  };
 
   return (
     <div
@@ -38,6 +57,6 @@ const HeartIcon = ({ product }) => {
       )}
     </div>
   );
-}
+};
 
-export default HeartIcon
+export default HeartIcon;

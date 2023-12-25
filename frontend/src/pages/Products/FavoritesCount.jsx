@@ -1,8 +1,15 @@
 import { useSelector } from "react-redux";
+import { useGetUserFavoritesQuery } from "../../redux/api/usersApiSlice";
 
 const FavoritesCount = () => {
-  const favorites = useSelector((state) => state.favorites);
-  const favoriteCount = favorites.length;
+  const {
+    data: favProducts,
+    refetch,
+    isLoading,
+    isError,
+  } = useGetUserFavoritesQuery();
+
+  const favoriteCount = favProducts?.length || 0;
 
   return (
     <div className="absolute left-2 top-8">

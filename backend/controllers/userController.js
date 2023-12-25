@@ -2,6 +2,7 @@ import User from "../models/userModel.js";
 import asyncHandler from "../middlewares/asyncHandler.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/createToken.js";
+import Product from "../models/productModel.js";
 
 const createUser = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
@@ -22,14 +23,12 @@ const createUser = asyncHandler(async (req, res) => {
     await newUser.save();
     generateToken(res, newUser._id);
 
-    res
-      .status(201)
-      .json({
-        _id: newUser._id,
-        username: newUser.username,
-        email: newUser.email,
-        isAdmin: newUser.isAdmin,
-      });
+    res.status(201).json({
+      _id: newUser._id,
+      username: newUser.username,
+      email: newUser.email,
+      isAdmin: newUser.isAdmin,
+    });
   } catch (error) {
     res.status(400);
     throw new Error("Invalid user data");
@@ -42,7 +41,10 @@ const loginUser = asyncHandler(async (req, res) => {
   const existingUser = await User.findOne({ email });
 
   if (existingUser) {
-    const isPasswordValid = await bcrypt.compare(password, existingUser.password);
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      existingUser.password
+    );
     if (isPasswordValid) {
       generateToken(res, existingUser._id);
 
@@ -59,7 +61,7 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 const logoutCurrentUser = asyncHandler(async (req, res) => {
-  res.cookie("jwt", '', {
+  res.cookie("jwt", "", {
     httpOnly: true,
     expiresIn: new Date(0),
   });
@@ -80,10 +82,9 @@ const getCurrentUserProfile = asyncHandler(async (req, res) => {
     res.json({
       _id: user._id,
       username: user.username,
-      email: user.email
+      email: user.email,
     });
-  }
-  else {
+  } else {
     res.status(404);
     throw new Error("User not found");
   }
@@ -95,7 +96,7 @@ const updateCurrentUserProfile = asyncHandler(async (req, res) => {
   if (user) {
     user.username = req.body.username || user.username;
     user.email = req.body.email || user.email;
-    
+
     if (req.body.password) {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(req.body.password, salt);
@@ -109,22 +110,22 @@ const updateCurrentUserProfile = asyncHandler(async (req, res) => {
       username: updatedUser.username,
       email: updatedUser.email,
       isAdmin: updatedUser.isAdmin,
-    })
+    });
   } else {
     res.status(404);
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
 });
 
 const deleteUserById = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
 
-  if (user) { 
+  if (user) {
     if (user.isAdmin) {
       res.status(400);
       throw new Error("Cannot delete admin user");
     }
-    
+
     await User.deleteOne({ _id: user._id });
     res.json({ message: "User deleted successfully" });
   } else {
@@ -166,4 +167,96 @@ const updateUserById = asyncHandler(async (req, res) => {
   }
 });
 
-export { createUser, loginUser, logoutCurrentUser, getAllUsers, getCurrentUserProfile, updateCurrentUserProfile, deleteUserById, getUserById, updateUserById };
+const addFavorites = asyncHandler(async (req, res) => {
+  try {
+    const { productId } = req.body;
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      res.status(404);
+      throw new Error("Product not found");
+    }
+
+    const isProductInFavorites = user.favorites.find(
+      (favorite) => favorite.toString() === productId.toString()
+    );
+    if (isProductInFavorites) {
+      throw new Error("Product already in favorites");
+    }
+
+    user.favorites.push(productId);
+    await user.save();
+
+    res.status(201).json({ message: "Product added to favorites" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+const getUserFavorites = asyncHandler(async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).populate("favorites").exec();
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+
+    res.json(user.favorites);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+const removeFavorites = asyncHandler(async (req, res) => {
+  try {
+    const { productId } = req.body;
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      res.status(404);
+      throw new Error("Product not found");
+    }
+
+    const isProductInFavorites = user.favorites.find(
+      (favorite) => favorite.toString() === productId.toString()
+    );
+    if (!isProductInFavorites) {
+      throw new Error("Product not in favorites");
+    }
+
+    user.favorites = user.favorites.filter(
+      (favorite) => favorite.toString() !== productId.toString()
+    );
+    await user.save();
+    res.status(200).json({ message: "Product removed from favorites" });
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+export {
+  createUser,
+  loginUser,
+  logoutCurrentUser,
+  getAllUsers,
+  getCurrentUserProfile,
+  updateCurrentUserProfile,
+  deleteUserById,
+  getUserById,
+  updateUserById,
+  addFavorites,
+  getUserFavorites,
+  removeFavorites,
+};

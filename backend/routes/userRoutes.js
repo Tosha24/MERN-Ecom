@@ -9,10 +9,17 @@ import {
   deleteUserById,
   getUserById,
   updateUserById,
+  addFavorites,
+  getUserFavorites,
+  removeFavorites,
 } from "../controllers/userController.js";
 import { authenticate, authorizeAdmin } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
+
+router.route("/favorites").get(authenticate, getUserFavorites);
+router.route("/favorites").post(authenticate, addFavorites);
+router.route("/favorites").delete(authenticate, removeFavorites);
 
 router
   .route("/")

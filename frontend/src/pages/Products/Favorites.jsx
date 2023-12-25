@@ -1,18 +1,22 @@
-import { useSelector } from "react-redux";
-import { selectFavoriteProduct } from "../../redux/features/favorites/favoriteSlice.js";
+import { useGetUserFavoritesQuery } from "../../redux/api/usersApiSlice.js";
 import Product from "./Product.jsx";
 
 const Favorites = () => {
-  const favorites = useSelector(selectFavoriteProduct);
+  const {
+    data: favProducts,
+    refetch,
+    isLoading,
+    isError,
+  } = useGetUserFavoritesQuery();
   
   return (
     <div className="ml-[10rem]">
       <h1 className="text-lg font-bold ml-[3rem] mt-[3rem]">
-        FAVORITE PRODUCTS ({favorites.length})
+        FAVORITE PRODUCTS ({favProducts?.length})
       </h1>
 
       <div className="flex flex-wrap">
-        {favorites && favorites.map((product) => (
+        {favProducts && favProducts.map((product) => (
           <Product key={product._id} product={product} />
         ))}
       </div>
