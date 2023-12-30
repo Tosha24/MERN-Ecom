@@ -32,7 +32,6 @@ const Login = () => {
 
     try {
       const res = await login({ email, password }).unwrap(); // unwrap is a utility function that unwraps the result of a fulfilled promise
-      console.log(res);
       dispatch(setCredentials({ ...res })); // dispatch is a function of the Redux store. You call store.dispatch to dispatch an action. This is the only way to trigger a state change.
     } catch (error) {
       toast.error(error?.data?.message || error.message);

@@ -17,8 +17,6 @@ const ProductTabs = ({
 }) => {
   const { data, isLoading } = useGetTopProductsQuery();
 
-  console.log(userInfo)
-
   const [activeTab, setActiveTab] = useState(1);
 
   if (isLoading) {

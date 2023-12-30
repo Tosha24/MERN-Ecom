@@ -6,6 +6,7 @@ import userRoutes from "./routes/userRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
 import connectDB from "./config/db.js";
 
 dotenv.config();
@@ -20,12 +21,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
+app.get("/api/config/paypal", (req, res) => {
+  res.send({ clientId: process.env.PAYPAL_CLIENT_ID });
+});
+
 app.use("/api/users", userRoutes)
 app.use("/api/category", categoryRoutes)
 app.use("/api/product", productRoutes)
 app.use("/api/upload", uploadRoutes)
+app.use("/api/orders", orderRoutes);
 
-const __dirname = path.resolve()    // resolve() method returns an absolute path of the current working directory.
-app.use("/uploads", express.static(path.join(__dirname + "/uploads")))    // This line of code makes the uploads folder static so that it can be accessed from the browser, in other words it means that the uploads folder is publicly available to the browser. Path.join() method joins all given path segments together using the platform-specific separator as a delimiter, then normalizes the resulting path.
+// const __dirname = path.resolve()    // resolve() method returns an absolute path of the current working directory.
+// app.use("/uploads", express.static(path.join(__dirname + "/uploads")))    // This line of code makes the uploads folder static so that it can be accessed from the browser, in other words it means that the uploads folder is publicly available to the browser. Path.join() method joins all given path segments together using the platform-specific separator as a delimiter, then normalizes the resulting path.
 
 app.listen(port, () => console.log(`Server running on port ${port}`))

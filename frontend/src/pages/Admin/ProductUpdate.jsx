@@ -13,8 +13,6 @@ import AdminMenu from "./AdminMenu";
 const ProductUpdate = () => {
   const params = useParams();
 
-  console.log(params._id)
-
   const { data: productData } = useGetProductByIdQuery(params._id);
 
   const [image, setImage] = useState(productData?.image || "");
