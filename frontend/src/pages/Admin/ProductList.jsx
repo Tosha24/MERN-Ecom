@@ -6,7 +6,6 @@ import {
 } from "../../redux/api/productApiSlice.js";
 import { useFetchCategoriesQuery } from "../../redux/api/categoryApiSlice.js";
 import { toast } from "react-toastify";
-import { createReducer } from "@reduxjs/toolkit";
 import AdminMenu from "./AdminMenu.jsx";
 
 const ProductList = () => {
@@ -53,25 +52,11 @@ const ProductList = () => {
     }
   };
 
-  const uploadFileHandler = async (e) => {
-    const formData = new FormData();
-    formData.append("image", e.target.files[0]);
-
-    try {
-      const res = await uploadProductImage(formData).unwrap();
-      toast.success(res.message);
-      setImage("/" + res.image);
-      setImageUrl("/" + res.image);
-    } catch (error) {
-      toast.error(error?.data?.message || error.error);
-    }
-  };
-
   const openCloudinaryWidget = () => {
     window.cloudinary.openUploadWidget(
       {
-        cloudName: "dmchjg2yt",
-        uploadPreset: "f2fmor0o",
+        cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+        uploadPreset: process.env.CLOUDINARY_UPLOAD_PRESET,
         sources: ["local", "url", "camera"],
         cropping: true,
         multiple: false,

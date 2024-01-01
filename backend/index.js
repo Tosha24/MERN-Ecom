@@ -29,7 +29,7 @@ app.use("/api/users", userRoutes)
 app.use("/api/category", categoryRoutes)
 app.use("/api/product", productRoutes)
 app.use("/api/upload", uploadRoutes)
-app.use("/api/orders", orderRoutes);
+app.use("/api/order", orderRoutes);
 
 // const __dirname = path.resolve()    // resolve() method returns an absolute path of the current working directory.
 // app.use("/uploads", express.static(path.join(__dirname + "/uploads")))    // This line of code makes the uploads folder static so that it can be accessed from the browser, in other words it means that the uploads folder is publicly available to the browser. Path.join() method joins all given path segments together using the platform-specific separator as a delimiter, then normalizes the resulting path.

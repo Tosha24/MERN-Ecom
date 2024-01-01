@@ -19,7 +19,6 @@ const orderSchema = mongoose.Schema(
           required: true,
           ref: "Category",
         }
-
       },
     ],
 
