@@ -11,8 +11,10 @@ import Modal from "../../components/Modal.jsx";
 
 const CategoryList = () => {
   const [name, setName] = useState("");
+  const [image, setImage] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [updateName, setUpdateName] = useState("");
+  const [updateImage, setUpdateImage] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
 
   // generate methods from mutations and queries
@@ -29,14 +31,19 @@ const CategoryList = () => {
       toast.error("Category name is required");
       return;
     }
+    if(!image){
+      toast.error("Category image is required");
+      return;
+    }
 
     try {
-      const result = await createCategory({ name }).unwrap();
+      const result = await createCategory({ name, image }).unwrap();
 
       if (result.error) {
         toast.error(result.error);
       } else {
         setName("");
+        setImage("");
         toast.success(`${result.name} is created`);
       }
     } catch (error) {
@@ -52,11 +59,15 @@ const CategoryList = () => {
       toast.error("Category name is required");
       return;
     }
+    if(!updateImage){
+      toast.error("Category image is required");
+      return;
+    }
 
     try {
       const result = await updateCategory({
         categoryId: selectedCategory._id,
-        updatedCategory: { name: updateName },
+        updatedCategory: { name: updateName, image: updateImage },
       }).unwrap();
 
       if (result.error) {
@@ -65,6 +76,7 @@ const CategoryList = () => {
         toast.success(`${result.name} is updated`);
         selectedCategory(null);
         setUpdateName('');
+        setUpdateImage('');
         setModalVisible(false);
       }
     } catch (error) {
@@ -97,6 +109,8 @@ const CategoryList = () => {
           value={name}
           setValue={setName}
           handleSubmit={handleCreateCategory}
+          imageUrl={image}
+          setImageUrl={setImage}
         />
         <br />
         <hr />
@@ -111,6 +125,7 @@ const CategoryList = () => {
                     setModalVisible(true);
                     setSelectedCategory(category);
                     setUpdateName(category.name);
+                    setUpdateImage(category.image);
                   }
                 }}
               >
@@ -127,6 +142,8 @@ const CategoryList = () => {
             handleSubmit={handleUpdateCategory}
             buttonText="Update"
             handleDelete={handleDeleteCategory}
+            imageUrl={updateImage}
+            setImageUrl={setUpdateImage}
           />
         </Modal>
       </div>
