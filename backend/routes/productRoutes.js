@@ -11,11 +11,14 @@ import {
   fetchProducts,
   fetchTopProducts,
   filterProducts,
+  getBrandsUsingCategory,
   removeProduct,
   updateProductDetails,
 } from "../controllers/productController.js";
 
 const router = express.Router();
+
+router.route("/product-brands").get(getBrandsUsingCategory);
 
 router.route("/").get(fetchProducts).post(authenticate, authorizeAdmin, formidable(), addProduct); // specify formidable() as a middleware to parse the form data.
 

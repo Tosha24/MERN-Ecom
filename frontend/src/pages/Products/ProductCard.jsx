@@ -1,84 +1,96 @@
-import { Link } from "react-router-dom";
-import { AiOutlineShoppingCart } from "react-icons/ai";
-import { useDispatch } from "react-redux";
-import { addToCart } from "../../redux/features/cart/cartSlice";
-import { toast } from "react-toastify";
+import React from "react";
 import HeartIcon from "./HeartIcon";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../redux/features/cart/cartSlice.js";
+import { AiOutlineShoppingCart } from "react-icons/ai";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
-const ProductCard = ({ singleProduct }) => {
+const backgroundColors = [
+  "bg-red-200",
+  "bg-violet-200",
+  "bg-green-200",
+  "bg-pink-200",
+  "bg-yellow-200",
+  "bg-cyan-200",
+  "bg-blue-200",
+  "bg-rose-200",
+  "bg-gray-200",
+  "bg-indigo-200",
+  "bg-fuchsia-200",
+  "bg-emerald-200",
+  "bg-teal-200",
+  "bg-amber-200",
+  "bg-orange-200",
+  "bg-purple-200",
+  "bg-lime-200",
+  "bg-sky-200",
+];
+
+let globalColorIndex = 0;
+const ProductCard = ({ product }) => {
   const dispatch = useDispatch();
+  const handleAddToCart = () => {
+    dispatch(
+      addToCart({
+        ...product,
+        quantity: 1,
+      })
+    );
+    toast.success("Product added to cart");
+  };
 
-  const addToCartHandler = (product, quantity) => {
-    dispatch(addToCart({ ...product, quantity }));
-    toast.success("Item added successfully", {
-      position: toast.POSITION.TOP_RIGHT,
-      autoClose: 2000,
-    });
+  const currentBackgroundColor = backgroundColors[globalColorIndex];
+  const anotherBackgroundColor =
+    backgroundColors[(globalColorIndex + 1) % backgroundColors.length];
+
+  globalColorIndex = (globalColorIndex + 1) % backgroundColors.length;
+
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/product/${product._id}`);
   };
 
   return (
-    <div className="w-[20rem] h-[22rem] relative bg-[#1A1A1A] rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-      <section className="relative">
-        <Link to={`/product/${singleProduct._id}`}>
-          <span className="absolute bottom-3 right-3 bg-pink-100 text-pink-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded-full dark:bg-pink-900 dark:text-pink-300">
-            {singleProduct?.brand}
-          </span>
-          <img
-            className="cursor-pointer w-full rounded-t-lg"
-            src={singleProduct.image}
-            alt={singleProduct.name}
-            style={{ height: "200px", objectFit: "fill" }}
-          />
-        </Link>
-        <HeartIcon product={singleProduct} />
-      </section>
+    <div
+      className={`flex flex-row justify-center items-center relative h-[400px] rounded-lg ${currentBackgroundColor} p-2 shadow-slate-200 shadow-lg
+ w-full sm:w-[300px] md:w-[300px] lg:w-[280px] 
+      `}
+    >
+      <div
+        className="flex flex-col justify-center items-center "
+        onClick={handleClick}
+      >
+        <img
+          src={product?.image}
+          alt={product?.name}
+          className={`!w-[200px] !h-[200px] rounded-full object-fill mt-[-40px] border-2`}
+          style={{ contain: "content" }}
+        />
 
-      <div className="p-5">
-        <div className="flex justify-between">
-          <h5 className="mb-2 text-xl text-whiet dark:text-white">{singleProduct?.name}</h5>
-
-          <p className="font-semibold text-pink-500">
-            {singleProduct?.price?.toLocaleString("en-US", {
-              style: "currency",
-              currency: "INR",
-            })}
+        <h1 className="text-[18px] font-bold flex flex-wrap mt-2 text-center">
+          {product?.name.length > 20
+            ? product?.name.substring(0, 40) + "..."
+            : product?.name}
+        </h1>
+        <div className="flex flex-row justify-between items-center w-full mt-10 pl-4 pr-4">
+          <p
+            className={` text-[14px] font-bold flex flex-wrap text-center ${anotherBackgroundColor} border-2 border-black p-2 rounded-full`}
+          >
+            {product.brand}
           </p>
+          <p className="text-lg text-black font-bold"> ₹ {product.price}</p>
         </div>
-
-        <p className="mb-3 font-normal text-[#CFCFCF]">
-          {singleProduct?.description?.substring(0, 34)} ...
-        </p>
-
-        <section className="flex justify-between items-center">
-          <Link
-            to={`/product/${singleProduct._id}`}
-            className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-pink-700 rounded-lg hover:bg-pink-800 focus:ring-4 focus:outline-none focus:ring-pink-300 dark:bg-pink-600 dark:hover:bg-pink-700 dark:focus:ring-pink-800"
-          >
-            Read More
-            <svg
-              className="w-3.5 h-3.5 ml-2"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 14 10"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M1 5h12m0 0L9 1m4 4L9 9"
-              />
-            </svg>
-          </Link>
-
-          <button
-            className="p-2 rounded-full"
-            onClick={() => addToCartHandler(singleProduct, 1)}
-          >
-            <AiOutlineShoppingCart size={25} />
-          </button>
-        </section>
+      </div>
+      <div className="absolute top-2 right-2 cursor-pointer">
+        <HeartIcon product={product} />
+      </div>
+      <div
+        onClick={handleAddToCart}
+        className="absolute bottom-2 right-5 cursor-pointer"
+      >
+        <AiOutlineShoppingCart size={26} />
       </div>
     </div>
   );

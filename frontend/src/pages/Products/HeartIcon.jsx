@@ -16,7 +16,7 @@ const HeartIcon = ({ product }) => {
 
   useEffect(() => {
     // Assuming favProducts is an array of favorite products for the user
-    const isProductFavorite = favProducts?.some((favProduct) => favProduct._id === product._id);
+    const isProductFavorite = favProducts?.find((favProduct) => favProduct._id === product._id);
     setIsFavorite(isProductFavorite);
   }, [favProducts, product._id]);
 
@@ -53,7 +53,7 @@ const HeartIcon = ({ product }) => {
       {isFavorite ? (
         <FaHeart className="text-pink-500" />
       ) : (
-        <FaRegHeart className="text-white" />
+        <FaRegHeart className="text-black" />
       )}
     </div>
   );

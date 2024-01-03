@@ -7,18 +7,17 @@ import {
   AiOutlineShoppingCart,
   AiOutlineClose,
   AiOutlineMenu,
-  AiFillHeart,
   AiOutlineHeart,
   AiOutlineLogout,
   AiOutlineUser,
 } from "react-icons/ai";
-import { FaHeart, FaUserPlus } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useLogoutMutation } from "../../redux/api/usersApiSlice";
 import { logout } from "../../redux/features/auth/authSlice";
 import Search from "../../components/Search";
+import FavoritesCount from "../Products/FavoritesCount";
 
 const Navigation = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -49,6 +48,7 @@ const Navigation = () => {
       await logoutApiCall().unwrap();
       dispatch(logout());
       navigate("/");
+      setDropdownOpen(false);
     } catch (error) {
       console.error(error);
     }
@@ -69,10 +69,22 @@ const Navigation = () => {
         </div>
         <div className="flex flex-row space-x-6 mr-6">
           <Link to="/cart" className="flex items-center justify-start">
+            <div className="relative">
+              <div className="absolute bottom-0 left-4">
+                {cartItems && (
+                  <span className="px-1 py-0 text-sm text-white bg-pink-500 rounded-full">
+                    {cartItems.length}
+                  </span>
+                )}
+              </div>
+            </div>
             <AiOutlineShoppingCart size={26} />
           </Link>
 
           <Link to="/favorite" className="flex items-center justify-start">
+            <div className="relative">
+              <FavoritesCount />
+            </div>
             <AiOutlineHeart size={26} />
           </Link>
           {userInfo ? (

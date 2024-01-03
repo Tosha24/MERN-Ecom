@@ -1,8 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-// Counter to keep track of the current color index
-
 const backgroundColors = [
   "bg-red-400",
   "bg-blue-400",
@@ -39,7 +37,7 @@ const ProductHeaderCard = ({ image, name, price, id }) => {
           {name.length > 20 ? name.substring(0, 30) + "..." : name}
         </h1>
         <h1 className="text-base sm:text-[18px] text-center mt-2 mb-2 font-bold">
-          ${price}
+          ₹ {price}
         </h1>
       </div>
     </Link>

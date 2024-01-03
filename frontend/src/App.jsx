@@ -7,9 +7,9 @@ const App = () => {
   return (
     <>
       <ToastContainer />
-      <div className="">
+      <div>
         <Navigation />
-        <main className="py-3 overflow-x-hidden">
+        <main className="overflow-x-hidden">
           <Outlet />
         </main>
       </div>

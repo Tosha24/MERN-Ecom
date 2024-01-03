@@ -5,12 +5,14 @@ import Header from "../components/Header";
 import Message from "../components/Message";
 import Product from "./Products/Product";
 import ProductCarousel from "./Products/ProductCarousel";
+import CategoryCarousel from "./Category/CategoryCarousel";
 
 const Home = () => {
   const { keyword } = useParams();
   const { data, isLoading, isError } = useGetProductsQuery({ keyword });
   return (
     <>
+    <CategoryCarousel/>
     <ProductCarousel/>
     </>
     // <>

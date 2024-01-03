@@ -60,7 +60,6 @@ const ProductCarousel = () => {
     return products.slice(currentIndex, endIndex);
   };
 
-  console.log("Current Index", currentIndex);
   return (
     <div className="rounded-lg relative pr-2 pl-2">
       {isLoading ? (
