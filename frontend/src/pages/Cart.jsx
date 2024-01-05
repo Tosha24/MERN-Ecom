@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { FaTrash } from "react-icons/fa";
 import { addToCart, removeFromCart } from "../redux/features/cart/cartSlice";
+import { useAddAndUpdateProductToCartMutation, useGetUserCartQuery, useRemoveProductFromCartMutation } from "../redux/api/usersApiSlice";
 
 const backgroundColors = [
   "bg-red-200",
@@ -27,18 +28,34 @@ const backgroundColors = [
 let globalColorIndex = 0;
 
 const Cart = () => {
+
+  const { data: cartItems, refetch } = useGetUserCartQuery();
+  const [addAndUpdateProductToCart] = useAddAndUpdateProductToCartMutation();
+  const [removeFromCart] = useRemoveProductFromCartMutation();
+
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
-  const cart = useSelector((state) => state.cart);
-  const { cartItems } = cart;
+  console.log(cartItems);
 
-  const addToCartHandler = (product, quantity) => {
-    dispatch(addToCart({ ...product, quantity }));
+  const addToCartHandler = async (productId, qty) => {
+    try {
+      await addAndUpdateProductToCart({
+        productId,
+        quantity: qty,
+      }).unwrap();
+      refetch();
+      toast.success("Added to cart");
+    } catch (error) {
+      toast.error("Error changing the quantity");
+    }
   };
 
-  const removeFromCartHandler = (id) => {
-    dispatch(removeFromCart(id));
+  const removeFromCartHandler = async (id) => {
+    await removeFromCart({
+      cartId: id,
+    }).unwrap();
+    refetch();
+    toast.success("Removed from cart");
   };
 
   const checkoutHandler = () => {
@@ -46,117 +63,130 @@ const Cart = () => {
   };
 
   return (
-    <>
-      <div className="container mx-auto p-4">
-        {cartItems.length === 0 ? (
-          <div>
-            Your cart is empty <Link to="/shop">Go To Shop</Link>
-          </div>
-        ) : (
-          <>
-            <div className="flex flex-col md:flex-row justify-between gap-4 items-start">
-              <div className="flex-1">
-                <h1 className="text-2xl font-semibold mb-4 text-center md:text-left">
-                  Shopping Cart ({cartItems && cartItems.length})
-                </h1>
+    <div className="container mx-auto p-4">
+      {cartItems && cartItems.length === 0 ? (
+        <div className="text-center">
+          Your cart is empty{" "}
+          <Link to="/shop" className="text-blue-500">
+            Go To Shop
+          </Link>
+        </div>
+      ) : (
+        <div className="flex flex-col md:flex-row justify-between gap-4 items-start">
+          <div className="flex-1">
+            <h1 className="text-2xl font-semibold mb-4 text-center md:text-left">
+              Shopping Cart
+            </h1>
 
-                {cartItems.map((item, index) => {
-                  const currentBackgroundColor =
-                    backgroundColors[
-                      (globalColorIndex + index) % backgroundColors.length
-                    ];
-                  const anotherBackgroundColor =
-                    backgroundColors[
-                      (globalColorIndex + index + 1) % backgroundColors.length
-                    ];
+            {cartItems &&
+              cartItems.map((item, index) => {
+                const currentBackgroundColor =
+                  backgroundColors[
+                    (globalColorIndex + index) % backgroundColors.length
+                  ];
+                const anotherBackgroundColor =
+                  backgroundColors[
+                    (globalColorIndex + index + 1) % backgroundColors.length
+                  ];
 
-                  return (
-                    <div
-                      key={item._id}
-                      className={`flex flex-col md:flex-row items-center gap-4 p-2 rounded-xl shadow relative ${currentBackgroundColor} mb-4`}
-                    >
-                      <div className="w-28 h-28 md:w-48 md:h-48 flex-shrink-0">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="w-full h-full object-cover rounded-[50%]"
-                        />
-                      </div>
-                      <div className="flex-grow">
-                        <Link
-                          to={`/product/${item._id}`}
-                          className="text-lg font-semibold text-black"
+                return (
+                  <div
+                    key={item._id}
+                    className={`flex flex-col md:flex-row items-center gap-4 p-2 rounded-xl shadow relative ${currentBackgroundColor} mb-4`}
+                  >
+                    <div className="w-28 h-28 md:w-48 md:h-48 flex-shrink-0">
+                      <img
+                        src={item.product.image}
+                        alt={item.product.name}
+                        className="w-full h-full object-cover rounded-[50%]"
+                      />
+                    </div>
+                    <div className="flex-grow">
+                      <Link
+                        to={`/product/${item.product._id}`}
+                        className="text-lg font-semibold text-black"
+                      >
+                        {item.product.name.substring(0, 35) + "..."}
+                      </Link>
+                      <div className="flex justify-between lg:justify-normal  flex-wrap gap-2 items-center mt-2">
+                        <span
+                          className={`text-sm font-bold ${anotherBackgroundColor} p-2 rounded-3xl border border-black`}
                         >
-                          {item.name}
-                        </Link>
-                        <div className="flex justify-between lg:justify-normal  flex-wrap gap-2 items-center mt-2">
-                          <span
-                            className={`text-sm font-bold ${anotherBackgroundColor} p-2 rounded-3xl border border-black`}
-                          >
-                            {item.brand}
-                          </span>
-                          <span className="text-lg font-bold">
-                            ₹ {item.price}
-                          </span>
-                        </div>
+                          {item.product.brand}
+                        </span>
+                        <span className="text-lg font-bold">
+                          $ {item.product.price}
+                        </span>
                       </div>
-                      <div
-                        className="
+                    </div>
+                    <div
+                      className="
                     flex  flex-row
                     justify-center items-center
                     gap-2 md:absolute
                     bottom-2 right-2
                   "
-                      >
-                        <label htmlFor="quantity" className="text-sm font-bold">
-                          Qty:
-                        </label>
+                    >
+                      <label htmlFor="qty" className="text-sm font-bold">
+                        Qty:
+                      </label>
 
-                        <select
-                          className="
+                      <select
+                        className="
                         text-sm font-bold
                         bg-white
                         border-2 border-black
                         p-2 rounded-full
                       "
-                          value={item.quantity}
-                          onChange={(e) =>
-                            addToCartHandler(item, Number(e.target.value))
-                          }
-                        >
-                          {[...Array(item.countInStock).keys()].map((x) => (
+                        value={item.quantity}
+                        onChange={(e) =>
+                          addToCartHandler(
+                            item?.product?._id,
+                            Number(e.target.value)
+                          )
+                        }
+                      >
+                        {[...Array(item.product.countInStock).keys()].map(
+                          (x) => (
                             <option key={x + 1} value={x + 1}>
                               {x + 1}
                             </option>
-                          ))}
-                        </select>
-                      </div>
-                      <button
-                        className="text-red-500 absolute top-2 right-2"
-                        onClick={() => removeFromCartHandler(item._id)}
-                      >
-                        <FaTrash size="1.5em" />
-                      </button>
+                          )
+                        )}
+                      </select>
                     </div>
-                  );
-                })}
-              </div>
-              <div
-                className={`w-full h-full  md:w-1/3 lg:w-1/4 shadow p-4 rounded-xl bg-slate-200 md:mt-12`}
-              >
-                <h2 className="text-xl font-semibold mb-2">Order Summary</h2>
-                <p className="text-lg">
-                  Items (
-                  {cartItems.reduce((acc, item) => acc + item.quantity, 0)})
-                </p>
-                <p className="text-2xl font-bold mb-4">
-                  Total: ₹
-                  {cartItems
-                    .reduce((acc, item) => acc + item.quantity * item.price, 0)
-                    .toFixed(2)}
-                </p>
-                <button
-                  className="
+                    <button
+                      className="text-red-500 absolute top-2 right-2"
+                      onClick={() => removeFromCartHandler(item?._id)}
+                    >
+                      <FaTrash size="1.5em" />
+                    </button>
+                  </div>
+                );
+              })}
+          </div>
+          <div
+            className={`w-full h-full  md:w-1/3 lg:w-1/4 shadow p-4 rounded-xl bg-slate-200 md:mt-12`}
+          >
+            <h2 className="text-xl font-semibold mb-2">Order Summary</h2>
+            <p className="text-lg">
+              Items (
+              {cartItems &&
+                cartItems.reduce((acc, item) => acc + item.quantity, 0)}
+              )
+            </p>
+            <p className="text-2xl font-bold mb-4">
+              Total: $
+              {cartItems &&
+                cartItems
+                  .reduce(
+                    (acc, item) => acc + item.quantity * item.product.price,
+                    0
+                  )
+                  .toFixed(2)}
+            </p>
+            <button
+              className="
                 w-full
                 bg-rose-500
                 text-white
@@ -165,17 +195,15 @@ const Cart = () => {
                 rounded-xl
                 mb-4
               "
-                  disabled={cartItems.length === 0}
-                  onClick={checkoutHandler}
-                >
-                  Proceed to Checkout
-                </button>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    </>
+              disabled={cartItems && cartItems.length === 0}
+              onClick={checkoutHandler}
+            >
+              Proceed to Checkout
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -38,13 +38,16 @@ const Shipping = () => {
   }, [navigate, shippingAddress]);
 
   return (
-    <div className="container mx-auto mt-10">
+    <div className="container mx-auto bg-rose-100 pt-10 pb-10">
       <ProgressSteps step1 step2 />
-      <div className="mt-[10rem] flex justify-around items-center flex-wrap">
-        <form onSubmit={submitHandler} className="w-[40rem]">
-          <h1 className="text-2xl font-semibold mb-4">Shipping</h1>
+      <div className="mt-8 flex justify-center">
+        <form
+          onSubmit={submitHandler}
+          className="w-full max-w-md border p-6 bg-white rounded-xl shadow-xl m-2"
+        >
+          <h1 className="text-2xl font-semibold mb-4 text-center">Shipping</h1>
           <div className="mb-4">
-            <label className="block text-white mb-2">Address</label>
+            <label className="block text-gray-600 mb-2">Address</label>
             <input
               type="text"
               className="w-full p-2 border rounded"
@@ -55,7 +58,7 @@ const Shipping = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-white mb-2">City</label>
+            <label className="block text-gray-600 mb-2">City</label>
             <input
               type="text"
               className="w-full p-2 border rounded"
@@ -66,7 +69,7 @@ const Shipping = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-white mb-2">Postal Code</label>
+            <label className="block text-gray-600 mb-2">Postal Code</label>
             <input
               type="text"
               className="w-full p-2 border rounded"
@@ -77,7 +80,7 @@ const Shipping = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-white mb-2">Country</label>
+            <label className="block text-gray-600 mb-2">Country</label>
             <input
               type="text"
               className="w-full p-2 border rounded"
@@ -88,7 +91,7 @@ const Shipping = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-400">Select Method</label>
+            <label className="block text-gray-600">Select Method</label>
             <div className="mt-2">
               <label className="inline-flex items-center">
                 <input

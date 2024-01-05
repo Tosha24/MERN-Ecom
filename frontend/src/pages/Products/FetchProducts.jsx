@@ -30,16 +30,14 @@ const ProductsPage = () => {
         setshowProduct={setshowProduct}
       />
 
-      <div className="flex flex-wrap">
-        <div className="flex flex-wrap gap-5 p-2">
-          {showProduct && displayProducts ? (
-            displayProducts.map((product) => (
-              <ProductCard key={product._id} product={product} />
-            ))
-          ) : (
-            <h1>No Products Found</h1>
-          )}
-        </div>
+      <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-4 m-3">
+        {showProduct && displayProducts ? (
+          displayProducts.map((product) => (
+            <ProductCard key={product._id} product={product} />
+          ))
+        ) : (
+          <h1>No Products Found</h1>
+        )}
       </div>
     </div>
   );

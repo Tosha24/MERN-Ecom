@@ -5,6 +5,7 @@ import { addToCart } from "../../redux/features/cart/cartSlice.js";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { useAddAndUpdateProductToCartMutation } from "../../redux/api/usersApiSlice.js";
 
 const backgroundColors = [
   "bg-red-200",
@@ -29,15 +30,20 @@ const backgroundColors = [
 
 let globalColorIndex = 0;
 const ProductCard = ({ product }) => {
-  const dispatch = useDispatch();
-  const handleAddToCart = () => {
-    dispatch(
-      addToCart({
-        ...product,
+  const [addAndUpdateProductToCart] = useAddAndUpdateProductToCartMutation();
+
+  console.log(product);
+
+  const handleAddToCart = async () => {
+    try {
+      await addAndUpdateProductToCart({
+        productId: product._id,
         quantity: 1,
-      })
-    );
-    toast.success("Product added to cart");
+      });
+      toast.success("Added to cart");
+    } catch (error) {
+      toast.error("Something went wrong.. Try again");
+    }
   };
 
   const currentBackgroundColor = backgroundColors[globalColorIndex];
@@ -46,26 +52,20 @@ const ProductCard = ({ product }) => {
 
   globalColorIndex = (globalColorIndex + 1) % backgroundColors.length;
 
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    navigate(`/product/${product._id}`);
-  };
-
   return (
     <div
-      className={`flex flex-row justify-center items-center relative h-[400px] rounded-lg ${currentBackgroundColor} p-2 shadow-slate-200 shadow-lg
- w-full sm:w-[300px] md:w-[300px] lg:w-[280px] 
-      `}
+      className={`flex flex-col justify-center items-center relative h-[400px] rounded-lg ${currentBackgroundColor} p-2 shadow-slate-200 shadow-lg `}
     >
       <div
         className="flex flex-col justify-center items-center "
-        onClick={handleClick}
+        onClick={() => {
+          window.location.href = `/product/${product._id}`;
+        }}
       >
         <img
           src={product?.image}
           alt={product?.name}
-          className={`!w-[200px] !h-[200px] rounded-full object-fill mt-[-40px] border-2`}
+          className={`!w-[200px] !h-[200px] rounded-full object-cover mt-[-40px] border-2`}
           style={{ contain: "content" }}
         />
 
@@ -80,7 +80,7 @@ const ProductCard = ({ product }) => {
           >
             {product.brand}
           </p>
-          <p className="text-lg text-black font-bold"> ₹ {product.price}</p>
+          <p className="text-lg text-black font-bold">${product.price}</p>
         </div>
       </div>
       <div className="absolute top-2 right-2 cursor-pointer">

@@ -3,6 +3,7 @@ import asyncHandler from "../middlewares/asyncHandler.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/createToken.js";
 import Product from "../models/productModel.js";
+import mongoose from "mongoose";
 
 const createUser = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
@@ -243,6 +244,101 @@ const removeFavorites = asyncHandler(async (req, res) => {
   }
 });
 
+// Cart controllers
+const addAndUpdateProductToCart = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { productId, quantity } = req.body;
+
+    const objProductId = new mongoose.Types.ObjectId(productId);
+
+    if (!productId) {
+      return res.status(400).json({ error: "Product ID is required" });
+    }
+
+    if (!quantity || !Number.isInteger(quantity) || quantity <= 0) {
+      return res
+        .status(400)
+        .json({ error: "Quantity should be a positive integer" });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    const existingProductIndex = user.cart.findIndex(
+      (item) => item.product.toString() === productId.toString()
+    );
+
+    if (existingProductIndex !== -1) {
+      user.cart[existingProductIndex].quantity = quantity;
+    } else {
+      user.cart.push({ product: objProductId, quantity });
+    }
+
+    await user.save();
+
+    res.status(200).json({ message: "Product added to cart successfully" });
+  } catch (error) {
+    res.status(500).send("Internal server error");
+  }
+});
+
+const getUserCart = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const user = await User.findById(userId).populate({
+      path: "cart.product",
+      model: "Product",
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const cart = user.cart || [];
+    res.status(200).json(cart);
+  } catch (error) {
+    res.status(500).send("Internal server error");
+  }
+});
+
+const removeProductFromCart = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id; 
+    const { cartId } = req.body; 
+
+    if (!cartId) {
+      return res
+        .status(400)
+        .json({ error: "Cart ID to remove is required" });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if(user.cart || user.cart.length > 0){
+      user.cart = user.cart.filter(
+        (item) => item?._id?.toString() !== cartId?.toString()
+      );
+
+      await user.save();
+    } 
+
+    res
+      .status(200)
+      .json({ message: "Product removed from cart successfully", user });
+  } catch (error) {
+    res.status(500).send("Internal server error");
+  }
+});
+
 export {
   createUser,
   loginUser,
@@ -256,4 +352,7 @@ export {
   addFavorites,
   getUserFavorites,
   removeFavorites,
+  addAndUpdateProductToCart,
+  getUserCart,
+  removeProductFromCart,
 };

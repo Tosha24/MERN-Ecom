@@ -12,10 +12,19 @@ import {
   addFavorites,
   getUserFavorites,
   removeFavorites,
+  addAndUpdateProductToCart,
+  getUserCart,
+  removeProductFromCart,
 } from "../controllers/userController.js";
 import { authenticate, authorizeAdmin } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
+
+// Cart routes
+router.route("/cart").post(authenticate, addAndUpdateProductToCart);
+router.route("/cart").get(authenticate, getUserCart);
+router.route("/cart").delete(authenticate, removeProductFromCart);
+
 
 router.route("/favorites").get(authenticate, getUserFavorites);
 router.route("/favorites").post(authenticate, addFavorites);

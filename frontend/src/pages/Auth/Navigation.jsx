@@ -14,28 +14,24 @@ import {
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { useLogoutMutation } from "../../redux/api/usersApiSlice";
+import {
+  useGetUserCartQuery,
+  useLogoutMutation,
+} from "../../redux/api/usersApiSlice";
 import { logout } from "../../redux/features/auth/authSlice";
 import Search from "../../components/Search";
 import FavoritesCount from "../Products/FavoritesCount";
 
 const Navigation = () => {
   const { userInfo } = useSelector((state) => state.auth);
-  const { cartItems } = useSelector((state) => state.cart);
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
 
+  const { data: cartItems } = useGetUserCartQuery();
+
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
-  };
-
-  const toggleSidebar = () => {
-    setShowSidebar(!showSidebar);
-  };
-
-  const closeSidebar = () => {
-    setShowSidebar(false);
   };
 
   const dispatch = useDispatch();
@@ -68,23 +64,21 @@ const Navigation = () => {
           </div>
         </div>
         <div className="flex flex-row space-x-6 mr-6">
-          <Link to="/cart" className="flex items-center justify-start">
-            <div className="relative">
-              <div className="absolute bottom-0 left-4">
-                {cartItems && (
-                  <span className="px-1 py-0 text-sm text-white bg-pink-500 rounded-full">
-                    {cartItems.length}
-                  </span>
-                )}
-              </div>
-            </div>
+          <Link to="/cart" className="flex items-center justify-start realtive">
+            {userInfo && (
+              <span className="absolute top-[0.78rem] right-[153px] bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                {cartItems && cartItems.length}
+              </span>
+            )}
             <AiOutlineShoppingCart size={26} />
           </Link>
 
           <Link to="/favorite" className="flex items-center justify-start">
-            <div className="relative">
-              <FavoritesCount />
-            </div>
+            {userInfo && (
+              <div className="relative">
+                <FavoritesCount />
+              </div>
+            )}
             <AiOutlineHeart size={26} />
           </Link>
           {userInfo ? (
@@ -108,7 +102,7 @@ const Navigation = () => {
         {dropdownOpen && (
           <div className="absolute top-16 right-2 p-3 space-y-4 w-40 bg-rose-200 rounded-md z-50">
             <Link
-              to="/profile"
+              to="/account"
               className="flex items-center justify-start gap-2  rounded-md"
             >
               <AiOutlineUserAdd size={23} />
@@ -137,7 +131,7 @@ const Navigation = () => {
           className={`lg:hidden flex items-center justify-center rounded-3xl fixed top-8 left-5 w-10 h-10 z-[500] cursor-pointer ${
             showSidebar
               ? "bg-rose-400"
-              : "bg-rose-300  transition duration-300 ease-in-out"
+              : "bg-rose-300 transition duration-300 ease-in-out"
           }`}
           onClick={() => setShowSidebar(!showSidebar)}
         >
@@ -149,11 +143,11 @@ const Navigation = () => {
       </div>
 
       {showSidebar && (
-        <div className="md:hidden flex flex-col py-20 h-[100vh] w-[100vw] bg-rose-300 z-500 transition duration-300 ease-in-out">
+        <div className="lg:hidden flex flex-col py-20 h-[100vh] w-[100vw] bg-rose-300 z-500 transition duration-300 ease-in-out">
           <div className="flex flex-col justify-start items-center h-[70vh]  space-y-2">
             <Link
               to="/"
-              className="flex items-center gap-2 justify-center   hover:bg-rose-200 p-3 rounded-md  hover:scale-110 transform transition duration-300 ease-in-out"
+              className="flex items-center gap-2 justify-center hover:bg-rose-200 p-3 rounded-md hover:scale-110 transform transition duration-300 ease-in-out"
             >
               <AiOutlineHome size={26} />
               <span>HOME</span>{" "}
@@ -184,7 +178,7 @@ const Navigation = () => {
             </Link>
 
             <Link
-              to="/profile"
+              to="/account"
               className="flex items-center justify-center gap-2 hover:bg-rose-200 p-3 rounded-md hover:scale-110 transform transition duration-300 ease-in-out"
             >
               <AiOutlineUserAdd className="mr-2" size={26} />

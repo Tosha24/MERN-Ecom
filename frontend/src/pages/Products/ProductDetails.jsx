@@ -8,18 +8,14 @@ import {
 } from "../../redux/api/productApiSlice";
 import Loader from "../../components/Loader";
 import Message from "../../components/Message";
-import {
-  FaBox,
-  FaClock,
-  FaShoppingCart,
-  FaStar,
-  FaStore,
-} from "react-icons/fa";
+import { FaClock, FaStar, FaStore } from "react-icons/fa";
+import { AiOutlineLeft } from "react-icons/ai";
 import moment from "moment";
 import HeartIcon from "./HeartIcon";
 import Ratings from "./Ratings";
 import ProductTabs from "./ProductTabs";
 import { addToCart } from "../../redux/features/cart/cartSlice";
+import { useAddAndUpdateProductToCartMutation } from "../../redux/api/usersApiSlice";
 
 const ProductDetails = () => {
   const { id: productId } = useParams();
@@ -41,15 +37,16 @@ const ProductDetails = () => {
 
   const [createReview, { isLoading: loadingProductReview }] =
     useCreateReviewMutation();
+  const [addAndUpdateProductToCart] = useAddAndUpdateProductToCartMutation();
 
   const submitHandler = async (e) => {
     e.preventDefault();
 
     try {
       await createReview({
-        productId, 
+        productId,
         rating,
-        comment
+        comment,
       }).unwrap();
       refetch();
       toast.success("Review created successfully");
@@ -60,20 +57,28 @@ const ProductDetails = () => {
     setComment("");
   };
 
-  const addToCartHandler = () => {
-    dispatch(addToCart({ ...product, quantity }));
-    navigate("/cart");
-  }
+  const addToCartHandler = async () => {
+    try {
+      await addAndUpdateProductToCart({
+        productId: product._id,
+        quantity: Number(quantity),
+      }); 
+      toast.success("Added to cart");
+      navigate('/cart');
+    } catch (error) {
+      toast.error("Something went wrong.. Try again")
+    }
+  };
 
   return (
     <>
-      <div>
-        <Link
-          to="/"
-          className="text-white font-semibold hover:underline ml-[10rem]"
+      <div className="mt-3">
+        <div
+          className="text-black font-semibold hover:underline ml-[10%] md:ml-[10rem] flex gap-2 items-center cursor-pointer"
+          onClick={() => navigate(-1)}
         >
-          Go Back
-        </Link>
+          <AiOutlineLeft /> Go Back
+        </div>
       </div>
 
       {isLoading ? (
@@ -84,63 +89,60 @@ const ProductDetails = () => {
         </Message>
       ) : (
         <>
-          <div className="flex flex-wrap relative items-between mt-[2rem] ml-[10rem]">
-            <div>
+          <div className="flex flex-col lg:flex-row relative items-center mt-4 lg:mt-8 mx-4 lg:mx-10 gap-6 mb-10 bg-red-100 p-6 rounded-2xl ">
+            <div className="lg:mr-4 p-2">
               <img
                 src={product.image}
                 alt={product.name}
-                className="w-[30rem] h-[30rem] object-fill mr-[2rem]"
+                className="w-full md:max-w-[45rem] lg:max-w-[45rem] md:w-[30rem] sm:w-[20rem] mb-4 md:mb-0 mx-auto md:mx-0 rounded-[50%]"
+                style={{ contain: "content" }}
               />
-              <HeartIcon product={product} />
+              <div className="absolute top-3 right-3 text-4xl">
+                <HeartIcon product={product} />
+              </div>
             </div>
 
-            <div className="flex flex-col justify-between">
-              <h2 className="text-2xl font-semibold">{product.name}</h2>
-              <p className="my-4 xl:w-[35rem] lg:w-[35rem] md:w-[30rem] text-[#B0B0B0]">
+            <div className="flex flex-col justify-between w-full lg:w-1/2">
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-semibold mb-2">
+                {product.name}
+              </h2>
+              <p className="my-2 text-slate-500 text-justify">
                 {product.description}
               </p>
 
-              <p className="text-5xl my-4 font-extrabold">₹ {product.price}</p>
+              <p className="text-2xl md:text-3xl lg:text-4xl my-2 font-extrabold">
+                $ {product.price}
+              </p>
 
-              <div className="flex items-center justify-between w-[20rem]">
-                <div className="one">
-                  <h1 className="flex items-center mb-6">
-                    <FaStore className="mr-2 text-white" /> Brand:{" "}
+              <div className="flex flex-row items-center justify-between">
+                <div className="flex flex-col md:flex-row justify-between w-full">
+                  <div className="flex items-center mb-2 md:mb-0">
+                    <FaStore className="mr-2 text-black" />{" "}
+                    <span className="font-semibold mr-2">Brand:</span>
                     {product.brand}
-                  </h1>
-                  <h1 className="flex items-center mb-6 w-[20rem]">
-                    <FaClock className="mr-2 text-white" /> Added:{" "}
+                  </div>
+                  <div className="flex items-center mb-2 md:mb-0">
+                    <FaClock className="mr-2 text-black" />{" "}
+                    <span className="font-semibold mr-2">Added:</span>{" "}
                     {moment(product.createdAt).fromNow()}
-                  </h1>
-                  <h1 className="flex items-center mb-6">
-                    <FaStar className="mr-2 text-white" /> Reviews:{" "}
-                    {product.numReviews}
-                  </h1>
-                </div>
-
-                <div className="two">
-                  <h1 className="flex items-center mb-6">
-                    <FaStar className="mr-2 text-white" /> Ratings: {rating}
-                  </h1>
-                  <h1 className="flex items-center mb-6">
-                    <FaShoppingCart className="mr-2 text-white" /> Quantity:{" "}
-                    {product.quantity}
-                  </h1>
-                  <h1 className="flex items-center mb-6 w-[10rem]">
-                    <FaBox className="mr-2 text-white" /> In Stock:{" "}
-                    {product.countInStock}
-                  </h1>
+                  </div>
+                  <div className="flex items-center mb-2 md:mb-0">
+                    <FaStar className="mr-2 text-black" />{" "}
+                    <span className="font-semibold mr-2">Ratings:</span>
+                    {rating}
+                  </div>
                 </div>
               </div>
 
-              <div className="flex justify-between flex-wrap">
+              <div className="flex justify-between flex-wrap items-center mt-5 gap-3">
                 <Ratings
                   value={product.rating}
                   text={`${product.numReviews} reviews`}
                 />
 
                 {product.countInStock > 0 && (
-                  <div>
+                  <div className="mb-2 md:mb-0">
+                    <span className="font-semibold mr-2">Qty:</span>
                     <select
                       value={quantity}
                       onChange={(e) => setQuantity(e.target.value)}
@@ -156,33 +158,29 @@ const ProductDetails = () => {
                 )}
               </div>
 
-              <div className="btn-container">
+              <div className="btn-container mt-4 md:mt-8">
                 <button
                   onClick={addToCartHandler}
                   disabled={product.countInStock === 0}
-                  className={`${
-                    product.countInStock === 0
-                      ? "bg-pink-400/95 hover:cursor-not-allowed"
-                      : "bg-pink-600"
-                  } text-white py-2 px-4 rounded-lg mt-4 md:mt-6`}
+                  className="bg-pink-600 text-white py-2 px-4 rounded-lg w-full md:w-auto"
                 >
-                  {product.countInStock === 0 ? "Out of Stock" : "Add to Cart"}
+                  Add To Cart
                 </button>
               </div>
             </div>
+          </div>
 
-            <div className="mt-[5rem] container flex flex-wrap items-start justify-between ml-[10rem]">
-              <ProductTabs
-                loadingProductReview={loadingProductReview}
-                userInfo={userInfo}
-                submitHandler={submitHandler}
-                rating={rating}
-                setRating={setRating}
-                comment={comment}
-                setComment={setComment}
-                product={product}
-              />
-            </div>
+          <div className="!w-full">
+            <ProductTabs
+              loadingProductReview={loadingProductReview}
+              userInfo={userInfo}
+              submitHandler={submitHandler}
+              rating={rating}
+              setRating={setRating}
+              comment={comment}
+              setComment={setComment}
+              product={product}
+            />
           </div>
         </>
       )}

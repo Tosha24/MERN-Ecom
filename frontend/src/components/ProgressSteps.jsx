@@ -1,37 +1,44 @@
 const ProgressSteps = ({ step1, step2, step3 }) => {
   return (
-    <div className="flex justify-center items-center space-x-4">
-      <div className={`${step1 ? "text-green-500" : "text-gray-300"}`}>
-        <span className="ml-2">Login</span>
-        <div className="mt-2 text-lg text-center">✅</div>
+    <div className="flex flex-row items-center justify-center">
+      <div
+        className={`text-center ${step1 ? "text-green-500" : "text-gray-300"}`}
+      >
+        <span>In cart</span>
+        {step1 && <div className="mt-2 text-lg">✅</div>}
       </div>
 
       {step2 && (
         <>
-          {step1 && <div className="h-0.5 w-[10rem] bg-green-500"></div>}
-          <div className={`${step1 ? "text-green-500" : "text-gray-300"}`}>
+          {step1 && <div className="h-0.5 w-[5rem] bg-green-500"></div>}
+          <div
+            className={`text-center ${
+              step2 ? "text-green-500" : "text-gray-300"
+            }`}
+          >
             <span>Shipping</span>
-            <div className="mt-2 text-lg text-center">✅</div>
+            {step2 && <div className="mt-2 text-lg">✅</div>}
           </div>
         </>
       )}
 
-      <>
-        {step1 && step2 && step3 ? (
-          <div className="h-0.5 w-[10rem] bg-green-500"></div>
-        ) : (
-          ""
-        )}
-
-        <div className={`${step3 ? "text-green-500" : "text-gray-300"}`}>
-          <span className={`${!step3 ? "ml-[10rem]" : ""}`}>Summary</span>
-          {step1 && step2 && step3 ? (
-            <div className="mt-2 text-lg text-center">✅</div>
-          ) : (
-            ""
+      {step3 && (
+        <>
+          {(step1 || step2) && (
+            <div className="h-0.5 w-[5rem] bg-green-500"></div>
           )}
-        </div>
-      </>
+          <div
+            className={`text-center ${
+              step3 ? "text-green-500" : "text-gray-300"
+            }`}
+          >
+            <span className={`${!(step1 || step2) ? "ml-[10rem]" : "ml-2"}`}>
+              Payment
+            </span>
+            {step3 && <div className="mt-2 text-lg">✅</div>}
+          </div>
+        </>
+      )}
     </div>
   );
 };
